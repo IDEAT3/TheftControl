@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">AntiTheft</string>
+    <string name="set_phone_number_button">Update</string>
+    <string name="set_phone_number_textview">Enter trusted phone Number</string>
+    <string name="DEFAULT_TRUSTED_PHONENUMBER">Default</string>
+    <string name="device_admin_explanation">This is to get Admin Privileges to detect incorrect password attempts</string>
+    
+    
+    
+    <string name="Debug_password_failed">Password failed</string>
+    <string name="Debug_password_success">Successfully logged in</string>
+    <string name="compliant">Insufficient password</string>
+    <string name="not_compliant">Sufficient password</string>
+</resources>
