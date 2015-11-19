@@ -11,23 +11,30 @@ import android.util.Log;
  * Created by akshayjnambiar on 11/12/2015.
  */
 public class DevicePolicyManaging extends Activity {
-    static final int ACTIVATION_REQUEST = 47; // identifies our request id
+    static final int ACTIVATION_REQUEST = 0;//DevicePolicyManager.WIPE_EXTERNAL_STORAGE; // identifies our request id
     public static DevicePolicyManager devicePolicyManager;
     ComponentName demoDeviceAdmin;
-    public static final Boolean debug = true;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Initialize Device Policy Manager service and our receiver class
         devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        // Initialize Device Policy Manager service and our receiver class
+
     }
 
-    public void resetPhone(int flag) {
+    public static void resetPhone(Context ctxt) {
         Log.d("TAG", "RESETing device now - all user data will be ERASED to factory settings");
-        // Change : uncomment the below line
-       // devicePolicyManager.wipeData(ACTIVATION_REQUEST);
+        ComponentName cn=new ComponentName(ctxt, PasswordDetection.class);
+        devicePolicyManager = (DevicePolicyManager) ctxt.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (devicePolicyManager.isAdminActive(cn)) {
+            try {
+                devicePolicyManager.wipeData(ACTIVATION_REQUEST);
+            } catch (Exception e) {
+                Log.d("TAG",e.getMessage());
+            }
+        }
     }
 
     public int currentFailedAttempts() {

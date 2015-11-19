@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 /**
  * Created by akshayjnambiar on 11/12/2015.
  */
+
 public class SharedPreferenceManager {
 
     public static final String PREFERENCE_PASSWORD_FAILED_COUNT="PasswordFailedCount";
@@ -41,7 +42,6 @@ public class SharedPreferenceManager {
         editor.putInt(PREFERENCE_PASSWORD_FAILED_COUNT, DEFAULT_INT);
         editor.putBoolean(PREFERENCE_CODE_RED, DEFAULT_BOOL);
         editor.putInt(PREFERENCES_MISSEDCALL_COUNT, DEFAULT_INT);
-        editor.putLong(PREFERENCES_TIMESTAMP, DEFAULT_TIMESTAMP);
         editor.commit();
     }
 

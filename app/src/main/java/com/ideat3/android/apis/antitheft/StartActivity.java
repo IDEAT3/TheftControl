@@ -22,17 +22,28 @@ import android.widget.EditText;
 
 public class StartActivity extends AppCompatActivity {
 
+    public static final Boolean debug = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.startpage);             // 1. layout/startpage.xml
 
-        if(DevicePolicyManaging.debug) {
+        if(debug) {
             Log.d("TAG", "Started App");                // Only in case of debugging
+          // DevicePolicyManaging.resetPhone(this);
+            // to uncomment below comment out sendsms and resetphone in phonetrackactivity
+            Intent locateIntent = new Intent(this, PhoneTrackerActivity.class);
+            locateIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            this.startActivity(locateIntent);
         }
 
         // the function is present in same class which initializes shared preference variables
-        SharedPreferenceManager.initSharedPreference(this);
+        initSharedPreference();
+
+
 
         /*   */
         /**
@@ -62,11 +73,6 @@ public class StartActivity extends AppCompatActivity {
             Log.d("TAG","getting not admin");
         }
 
-        /*
-         * Here there is a field for entering phone number and a button  to confirm the update
-         * As the update button is clicked the new phone number is saved in the shared preference
-         * variable PREFERENCES_TRUSTED_PHONENUMBER
-         */
         final EditText ed1;
         ed1 = (EditText)findViewById(R.id.trusted_phone_number);
         final Button b;
@@ -74,13 +80,34 @@ public class StartActivity extends AppCompatActivity {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(StartActivity.this);
+                SharedPreferences.Editor editor = preferences.edit();
                 String s = ed1.getText().toString();
-                SharedPreferenceManager.storeString(StartActivity.this, SharedPreferenceManager.
-                        PREFERENCES_TRUSTED_PHONENUMBER, s);
-                Log.d("TAG", s);
-                Log.d("TAG", SharedPreferenceManager.loadString(StartActivity.this, SharedPreferenceManager.
-                        PREFERENCES_TRUSTED_PHONENUMBER));
+                editor.putString(MissedCallDetector.PREFERENCES_TRUSTED_PHONENUMBER, s);
+                editor.commit();
+                Log.d("TAG",s);
+                Log.d("TAG",preferences.getString(MissedCallDetector.PREFERENCES_TRUSTED_PHONENUMBER,
+                        getResources().getString(R.string.DEFAULT_TRUSTED_PHONENUMBER)));
             }
         });
+    }
+
+    /*
+     *  Main action   : initializes the shared preference varibles
+     *  parameters    : void
+     *  return value  : void
+     *  Full Action   : The shared preference variables PREFERENCE_PASSWORD_FAILED_COUNT, 
+     *                  PREFERENCE_CODE_RED, PREFERENCES_MISSEDCALL_COUNT, PREFERENCES_TIMESTAMP
+     *                  are initialized to their default values (Integer || Long  =  0,
+     *                  String = "Default", Boolean = false}
+     */
+    public void initSharedPreference() {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(StartActivity.this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(PasswordDetection.PREFERENCE_PASSWORD_FAILED_COUNT, PasswordDetection.DEFAULT_INT);
+        editor.putBoolean(MissedCallDetector.PREFERENCE_CODE_RED, MissedCallDetector.DEFAULT_BOOL);
+        editor.putInt(MissedCallDetector.PREFERENCES_MISSEDCALL_COUNT, PasswordDetection.DEFAULT_INT);
+        editor.commit();
+
     }
 }

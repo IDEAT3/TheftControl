@@ -16,14 +16,21 @@ import android.widget.Toast;
  */
 public class PasswordDetection extends DeviceAdminReceiver {
 
+    public static final String PREFERENCE_PASSWORD_FAILED_COUNT="PasswordFailedCount";
+    public static final int DEFAULT_INT=0;
+    public static final int DEFAULT_LONG=0;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
+
     @Override
     public void onEnabled(Context ctxt, Intent intent) {
-        Log.d("TAG", "Password Detection Enabled");
+        Log.d("TAG","Password Detection Enabled");
 
         // set failed attempts 0
-
-        SharedPreferenceManager.storeInt(ctxt, SharedPreferenceManager.PREFERENCE_PASSWORD_FAILED_COUNT,
-                SharedPreferenceManager.DEFAULT_INT);
+        preferences = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        editor = preferences.edit();
+        editor.putInt(PREFERENCE_PASSWORD_FAILED_COUNT, DEFAULT_INT);
+        editor.commit();
 
         ComponentName cn=new ComponentName(ctxt, PasswordDetection.class);
         DevicePolicyManager mgr=(DevicePolicyManager)ctxt.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -53,20 +60,21 @@ public class PasswordDetection extends DeviceAdminReceiver {
     public void onPasswordFailed(Context ctxt, Intent intent) {
 
         Toast.makeText(ctxt, R.string.Debug_password_failed, Toast.LENGTH_LONG).show();
-        int count_failed_attempts = SharedPreferenceManager.loadInt(ctxt,SharedPreferenceManager.
-                PREFERENCE_PASSWORD_FAILED_COUNT);
+        preferences = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        editor = preferences.edit();
+        int count_failed_attempts = preferences.getInt(PREFERENCE_PASSWORD_FAILED_COUNT, DEFAULT_INT);
         count_failed_attempts++;
-        SharedPreferenceManager.storeInt(ctxt, SharedPreferenceManager.PREFERENCE_PASSWORD_FAILED_COUNT,
-                count_failed_attempts);
-
+        editor.putInt(PREFERENCE_PASSWORD_FAILED_COUNT, count_failed_attempts);
+        editor.commit();
 
         // Checking if the function is working
-        int d = DevicePolicyManaging.devicePolicyManager.getCurrentFailedPasswordAttempts();
-        Log.d("TAG", Integer.toString(d));
-        if(count_failed_attempts>=3) {
-            SharedPreferenceManager.storeBoolean(ctxt, SharedPreferenceManager.PREFERENCE_CODE_RED, true);
+
+        if(count_failed_attempts%3==0) {
+            editor.putBoolean(MissedCallDetector.PREFERENCE_CODE_RED, true);
+            editor.commit();
+
             Log.d("TAG", Integer.toString(count_failed_attempts));
-            sendSmsByManager("Code Red",ctxt);
+            Utils.SendSMS(ctxt,"Code Red");
         }
         Log.d("TAG","Password Failed");
 
@@ -76,21 +84,19 @@ public class PasswordDetection extends DeviceAdminReceiver {
     public void onPasswordSucceeded(Context ctxt, Intent intent) {
         Log.d("TAG", "Password success");
         Toast.makeText(ctxt, R.string.Debug_password_success, Toast.LENGTH_LONG).show();
-
-        SharedPreferenceManager.storeInt(ctxt, SharedPreferenceManager.PREFERENCE_PASSWORD_FAILED_COUNT,
-                SharedPreferenceManager.DEFAULT_COUNT);
-        SharedPreferenceManager.storeInt(ctxt, SharedPreferenceManager.PREFERENCES_MISSEDCALL_COUNT,
-                SharedPreferenceManager.DEFAULT_INT);
-        SharedPreferenceManager.storeBoolean(ctxt, SharedPreferenceManager.PREFERENCE_CODE_RED,
-                SharedPreferenceManager.DEFAULT_BOOL);
+        preferences = PreferenceManager.getDefaultSharedPreferences(ctxt);
+        editor = preferences.edit();
+        editor.putInt(PREFERENCE_PASSWORD_FAILED_COUNT, DEFAULT_INT);
+        editor.putInt(MissedCallDetector.PREFERENCES_MISSEDCALL_COUNT, DEFAULT_INT);
+        editor.putBoolean(MissedCallDetector.PREFERENCE_CODE_RED, MissedCallDetector.DEFAULT_BOOL);
+        editor.commit();
     }
 
     public void sendSmsByManager(String text, Context ctxt) {
+        preferences = PreferenceManager.getDefaultSharedPreferences(ctxt);
         try {
             SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(SharedPreferenceManager.loadString(ctxt,SharedPreferenceManager.
-                    PREFERENCES_TRUSTED_PHONENUMBER), null, text, null, null);
-
+            smsManager.sendTextMessage(preferences.getString(MissedCallDetector.PREFERENCES_TRUSTED_PHONENUMBER,"Default"), null, text, null, null);
             //  Only for debugging
             Toast.makeText(ctxt.getApplicationContext(), "Your sms has been send", Toast.LENGTH_LONG).show();
         } catch (Exception ex) {

@@ -11,4 +11,7 @@
     <string name="Debug_password_success">Successfully logged in</string>
     <string name="compliant">Insufficient password</string>
     <string name="not_compliant">Sufficient password</string>
+
+    <string name="tracking_address">Address: </string>
+    <string name="tracking_returned_no_location">No Location Determined</string>
 </resources>
